@@ -1,0 +1,94 @@
+---
+title: "The Many Faces of 'Iris.png' a ggplot2 exploration"
+author: "Samantha Toet"
+date: "9/20/2018"
+output: ioslides_presentation
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(viridis)
+diamonds <- ggplot2::diamonds
+data(iris)
+```
+
+## Who am I?
+
+<style>
+  .col2 {
+    columns: 2 50%;         
+    -webkit-columns: 2 200px; 
+    -moz-columns: 2 200px;    
+  }
+</style>
+
+Hi, I'm Sam Toet
+
+<div class="col2">
+![](hauncher.png)
+
+* UVA Alum (social psych)
+
+* Marketing Data Analyst, VividCortex
+
+* Founder, R-Ladies Charlottesville
+</div>
+
+## Want to follow along?
+
+Slides, code, and sample plots are available on Github:
+
+* Full presentation: 
+
+* Just show me the code: 
+
+## Back to why we're all here: ggplot
+
+The grammar of graphics assembles plots in layers, and each layer is relatively independent. 
+
+That means you create your graph in a series of independent actions: 
+
+1. creating the plot and assigning the axes 
+2. building a geometric object from your data
+3. mapping variables as different aesthetics
+
+## What is ggplot?
+
+These layers are the foundation that you can use to make *any* type of plot:
+
+<div class = "centered">
+![](layers.png)
+</div>
+
+## Aesthetic Mappings 
+
+<div class = "centered">
+![](aes.png)
+</div>
+
+
+
+Essentially, any time there is a variable that you want to look at, put it in the mappings. This is where you tell ggplot what the x and y variables are, in addition to any other variables that you want to explore. 
+
+You can also change what variables are being mapped within layers... we’ll get back to that though.
+
+## For Example {.smaller}
+
+In this scatterplot we're mapping carat to x, price to y, and cut to color:
+
+```{r, echo=TRUE}
+ggplot(diamonds, mapping = aes(x = carat, y = price, col = cut)) +
+    geom_point()
+```
+
+## Geom functions
+
+<div class = "centered">
+![](geom.png)
+</div>
+
+
+
+ 
