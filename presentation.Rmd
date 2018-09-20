@@ -1,5 +1,5 @@
 ---
-title: "The Many Faces of 'Iris.png' a ggplot2 exploration"
+title: "ggplot rules"
 author: "Samantha Toet"
 date: "9/20/2018"
 output: ioslides_presentation
@@ -8,26 +8,30 @@ output: ioslides_presentation
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(mapdata)
 library(tidyverse)
 library(viridis)
+library(cowplot)
+library(ggbeeswarm)
+library(devtools)
+devtools::install_github('thomasp85/gganimate')
 diamonds <- ggplot2::diamonds
 data(iris)
+data("mpg")
 ```
 
 ## Who am I?
 
-<style>
-  .col2 {
-    columns: 2 50%;         
-    -webkit-columns: 2 200px; 
-    -moz-columns: 2 200px;    
-  }
-</style>
+
+<div class="columns-2">
 
 Hi, I'm Sam Toet
 
-<div class="col2">
 ![](hauncher.png)
+
+
+
+
 
 * UVA Alum (social psych)
 
@@ -35,6 +39,15 @@ Hi, I'm Sam Toet
 
 * Founder, R-Ladies Charlottesville
 </div>
+
+## What am I talking about?
+
+* The magic of ggplot
+
+* Creating ggplots
+
+* Next level exploratory data analysis
+
 
 ## Want to follow along?
 
@@ -44,37 +57,46 @@ Slides, code, and sample plots are available on Github:
 
 * Just show me the code: 
 
-## Back to why we're all here: ggplot
-
-The grammar of graphics assembles plots in layers, and each layer is relatively independent. 
-
-That means you create your graph in a series of independent actions: 
-
-1. creating the plot and assigning the axes 
-2. building a geometric object from your data
-3. mapping variables as different aesthetics
-
 ## What is ggplot?
 
-These layers are the foundation that you can use to make *any* type of plot:
+The grammar of graphics is an idea that plots are assembled in layers, and each layer does something different. 
 
-<div class = "centered">
-![](layers.png)
-</div>
+That means you make your graph through a series of independent actions: 
+
+1. Create the plot and assign the axes 
+2. Build a geometric object from your data
+3. Map variables as different aesthetics
+
+## How does it work?
+
+![](https://media.giphy.com/media/12NUbkX6p4xOO4/giphy.gif)
+
+But really,
+
+```{r data, eval = F}
+ggplot(data, mapping = aes(...)) +
+    geoms() +
+    coordinates() +
+    facets()
+```
+
+With these layers you can make *any* type of plot.
+
 
 ## Aesthetic Mappings 
 
-<div class = "centered">
-![](aes.png)
-</div>
-
-
+```{r aes, eval = F}
+ggplot(data, MAPPING = AES(...)) +
+    geoms() +
+    coordinates() +
+    facets()
+```
 
 Essentially, any time there is a variable that you want to look at, put it in the mappings. This is where you tell ggplot what the x and y variables are, in addition to any other variables that you want to explore. 
 
-You can also change what variables are being mapped within layers... we’ll get back to that though.
+You can also change what variables are being mapped *within* layers... we’ll get back to that though.
 
-## For Example {.smaller}
+## For example - colors {.smaller}
 
 In this scatterplot we're mapping carat to x, price to y, and cut to color:
 
@@ -83,12 +105,257 @@ ggplot(diamonds, mapping = aes(x = carat, y = price, col = cut)) +
     geom_point()
 ```
 
-## Geom functions
+## Geom Functions
 
-<div class = "centered">
-![](geom.png)
-</div>
+```{r geom, eval = F}
+ggplot(data, mapping = aes(...)) +
+    GEOMS() +
+    coordinates() +
+    facets()
+```
 
+
+The type of plot that you want to make (histogram, scatterplot, area map, density curve, etc.) is determined by the geom function that you use. 
+
+## For example - 3 diamonds & a map
+
+```{r geom_ex, echo=FALSE, warning=FALSE, message=FALSE}
+p1 <- ggplot(diamonds, aes(x = carat, y = price, col = cut)) +
+    geom_point()
+
+p2 <- ggplot(diamonds, aes(x = carat)) +
+    geom_density()
+
+usa <- map_data("usa")
+
+p3 <- ggplot(usa, aes(long, lat, group = group)) + 
+    geom_polygon(fill = "white", colour = "black")
+
+p4 <- ggplot(diamonds, aes(x = cut, y = carat)) +
+    geom_boxplot()
+
+cowplot::plot_grid(plotlist = list(p1, p2, p3, p4))
+```
+
+## Stat transformations
+
+```{r stat, eval = F}
+ggplot(data, mapping = aes(...)) +
+    geoms(STAT) +
+    coordinates() +
+    facets()
+```
+Statistical transformations and geoms can generally be interchangeable.
+
+They refer to the changes that you have to make to your data to use it in your plot. 
+
+## `geom_bar()` vs. `geom_col()`
+
+What's the difference between a histogram and a bar chart? 
+
+* In math: histogram != bar chart
+
+* In ggplot: geom_histogram == geom_bar
+
+```{r hist, echo=t}
+?geom_histogram
+```
+
+You'll see that the documentation states: "`geom_histogram` is an alias for `geom_bar` plus `stat_bin`." 
+
+## What? {.smaller}
+
+`geom_bar` creates a histogram, a bar chart where the heights of the bars represents the number of cases in each group.
+
+```{r stat_ex, echo=TRUE}
+ggplot(diamonds, aes(cut)) +
+    geom_bar()
+```
+
+## `stat_count`
+
+To create this plot, ggplot has to first count the number of diamonds that fall into each category of cut, that's what `stat_count` does.
+
+Essentially it creates a new variable, "count":
+
+```{r stat_ex2, echo=FALSE}
+count_df <- data.frame(
+  cut = c("Fair", "Good", "Very Good", "Premium", "Ideal"),
+  count = c(1610, 4906, 12082, 13791, 21551),
+  prop = c(1, 1, 1, 1, 1)
+)
+count_df
+```
+
+## So what about `geom_col()`? {.smaller}
+
+`geom_col()` creates a bar chart where the heights of the bars represents the values of the data, or `stat_identity()`.
+
+```{r, stat_ex3}
+ggplot(diamonds, aes(carat, price)) +
+    geom_col()
+```
+
+## Why are you showing us this?
+
+TLDR;
+
+* `geom_bar()` creates histograms based on the `stat_count` transformation
+
+* `geom_col()` creates bar charts based on the `stat_identity` transformation
+
+* This illustrates how stats work within geoms and how they can be relatively interchangeable 
+
+## Postitions
+
+```{r pos, eval=F}
+ggplot(data, mapping = aes(...)) +
+    geoms(POSITION) +
+    coordinates() +
+    facets()
+```
+
+Position refers to ways adjust the location or orientation of your data.
+
+One way to deal with overplotting points is to add some jitter or a little bit of randomness.
+
+## For example - jitter {.smaller}
+
+```{r jitter1}
+ggplot(mpg, mapping = aes(x = displ, y = hwy)) +
+    geom_point()
+```
+
+
+## `position = "jitter"` {.smaller}
+
+Now you can see there's some randomness to the position of each point.
+```{r jitter2}
+ggplot(mpg, mapping = aes(x = displ, y = hwy)) +
+    geom_point(position = "jitter")
+```
+
+## Coordinate functions
+
+```{r coord, eval=FALSE}
+ggplot(data, mapping = aes(...)) +
+    geoms() +
+    COORDINATES() +
+    facets()
+```
+
+We're all used to Cartesian systems, but you can change your coordinate system to flip your x & y axis', make a pie chart, draw a map, and do a number of other things. 
+
+## For example - coxcombs {.smaller}
+
+Turn this:
+```{r bar}
+ggplot(data = diamonds, aes(x = cut, fill = clarity)) +
+    geom_bar()
+```
+
+## Coxcomb charts {.smaller}
+
+Into this:
+```{r cox}
+ggplot(data = diamonds, aes(x = cut, fill = clarity)) +
+    geom_bar() +
+    coord_polar()
+```
+
+## Facet functions
+
+```{r facet, eval=FALSE}
+ggplot(data, mapping = aes(...)) +
+    geoms() +
+    coordinates() +
+    FACETS()
+```
+
+Split your plot up into subplots, or facets,  that each display one subset of the data. This is particularly useful for categorical variables.
+
+## For example - facet wrap {.smaller}
+
+The same histogram of price, broken down into subplots based on cut. 
+
+```{r facet_ex}
+ggplot(diamonds, aes(x = price)) +
+    geom_histogram(binwidth = 1000) +
+    facet_wrap(~cut)
+```
+
+
+
+## Back to aesthetics 
+
+```{r aes_again, eval = F}
+ggplot(data, MAPPING = AES(...)) +
+    geoms() +
+    coordinates() +
+    facets()
+```
+
+Mappings can be applied to *each* layer *individually*. 
+
+The mappings inside of a function are applied *to that layer only*, so it is possible to display different aesthetics *and data* in different layers.
+
+## Where to begin?
+
+```{r ally, results='hide', message=FALSE}
+library(GGally)
+```
+
+
+`ggpairs()` is a function from the `GGally` package that 
+
+* provides two different comparisons of each pair of columns, and 
+
+* displays either the density or count of the respective variable along the diagonal. 
+
+
+## What does it show me?
+```{r pairs, message=FALSE}
+small_diamonds <- sample_n(diamonds, 1000)
+ggpairs(small_diamonds, columns = c(1:6))
+```
+
+## cut vs. carat & price
+
+Let's look a little closer:
+
+```{r bee, echo=FALSE}
+cowplot::plot_grid(
+    ggplot(small_diamonds, aes(carat, price, color = cut)) +
+    geom_point(alpha = .5),
+    ggplot(small_diamonds, aes(cut, price)) +
+    geom_quasirandom(alpha = .1)
+)
+```
+
+## So what?
+
+So from this quick exploratory data analysis using only two plots we can see that people are willig to pay more $ for bigger, not higher quality, diamonds. We can also see that more diamonds are classified as having an "ideal" cut. Hmm...
+
+## ggplot extensions
+
+There are many other extensions to ggplot that you can use to enhance your plots and take them to the next level. 
+
+Check out www.ggplot2-exts.org for a list of them. 
+
+
+## gganimate
+
+gganimate can animate your plots to show how values change over time. It's still in development, so it's not playing nicely with my computer at the moment:
+
+https://github.com/thomasp85/gganimate
+
+## That's all folks!
+
+Any questions?
+
+Email: samantha@rladies.org
+
+Twitter: @Samantha_Toet
 
 
  
