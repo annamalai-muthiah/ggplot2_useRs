@@ -14,6 +14,7 @@ library(viridis)
 library(cowplot)
 library(ggbeeswarm)
 library(devtools)
+library(GGally)
 devtools::install_github('thomasp85/gganimate')
 diamonds <- ggplot2::diamonds
 data(iris)
@@ -53,9 +54,9 @@ Hi, I'm Sam Toet
 
 Slides, code, and sample plots are available on Github:
 
-* Full presentation: 
+* Full presentation: Github > SamanthaToet > ggplot2_useRs > presentation
 
-* Just show me the code: 
+* Just show me the code: Github > SamanthaToet > ggplot2_useRs > just_code
 
 ## What is ggplot?
 
@@ -83,7 +84,7 @@ ggplot(data, mapping = aes(...)) +
 With these layers you can make *any* type of plot.
 
 
-## Aesthetic Mappings 
+## Aesthetic mappings 
 
 ```{r aes, eval = F}
 ggplot(data, MAPPING = AES(...)) +
@@ -105,7 +106,7 @@ ggplot(diamonds, mapping = aes(x = carat, y = price, col = cut)) +
     geom_point()
 ```
 
-## Geom Functions
+## Geom functions
 
 ```{r geom, eval = F}
 ggplot(data, mapping = aes(...)) +
@@ -174,7 +175,7 @@ ggplot(diamonds, aes(cut)) +
 
 ## `stat_count`
 
-To create this plot, ggplot has to first count the number of diamonds that fall into each category of cut, that's what `stat_count` does.
+To create this plot, ggplot has to first count the number of diamonds that fall into each category of cut - that's what `stat_count` does.
 
 Essentially it creates a new variable, "count":
 
@@ -189,7 +190,7 @@ count_df
 
 ## So what about `geom_col()`? {.smaller}
 
-`geom_col()` creates a bar chart where the heights of the bars represents the values of the data, or `stat_identity()`.
+`geom_col()` creates a bar chart where the heights of the bars represents the values of the data, or the `stat_identity`.
 
 ```{r, stat_ex3}
 ggplot(diamonds, aes(carat, price)) +
@@ -215,9 +216,9 @@ ggplot(data, mapping = aes(...)) +
     facets()
 ```
 
-Position refers to ways adjust the location or orientation of your data.
+Position adjustments refer to ways to adjust the location or orientation of your data.
 
-One way to deal with overplotting points is to add some jitter or a little bit of randomness.
+One way to deal with overplotting points is to add some jitter, or a little bit of randomness.
 
 ## For example - jitter {.smaller}
 
@@ -272,7 +273,7 @@ ggplot(data, mapping = aes(...)) +
     FACETS()
 ```
 
-Split your plot up into subplots, or facets,  that each display one subset of the data. This is particularly useful for categorical variables.
+Facet function let you split your plot into subplots, or facets,  that each display one subset of the data. This is particularly useful for categorical variables.
 
 ## For example - facet wrap {.smaller}
 
@@ -286,7 +287,7 @@ ggplot(diamonds, aes(x = price)) +
 
 
 
-## Back to aesthetics 
+## Back to aesthetics...
 
 ```{r aes_again, eval = F}
 ggplot(data, MAPPING = AES(...)) +
@@ -306,16 +307,18 @@ library(GGally)
 ```
 
 
-`ggpairs()` is a function from the `GGally` package that 
+`ggpairs()` is a function from the `GGally` package that does two helpful things:
 
-* provides two different comparisons of each pair of columns, and 
+* provides two different comparisons of each pair of columns 
 
-* displays either the density or count of the respective variable along the diagonal. 
+* displays either the density or count of the respective variable along the diagonal
 
 
-## What does it show me?
+## What does it look like?
 ```{r pairs, message=FALSE}
 small_diamonds <- sample_n(diamonds, 1000)
+
+small_diamonds <- small_diamonds[c("carat", "cut", "color", "clarity", "depth", "price")]
 ggpairs(small_diamonds, columns = c(1:6))
 ```
 
